@@ -5,19 +5,7 @@ set(PROJECT_VESRION 0.0.${PATCH_VERSION})
 
 project(helloworld VERSION ${PROJECT_VESRION})
 
-set(CMAKE_BUILD_TYPE Debug)
-
-include(${PROJECT_SOURCE_DIR}/cmake/conan.cmake)
-conan_cmake_run(
-  CONANFILE conanfile.txt
-  BASIC_SETUP
-  CMAKE_TARGETS # individual targets to link to
-  BUILD
-    missing 
-)
-
 option(WITH_BOOST_TEST "Whether to build Boost test" ON)
-option(WITH_GTEST "Whether to build GTEST test" OFF)
 
 configure_file(version.h.in version.h)
 
@@ -57,18 +45,6 @@ if(WITH_BOOST_TEST)
     )
 endif()
 
-if(WITH_GTEST)
-    
-    add_executable(gtest_version gtest_version.cpp)
-    target_link_libraries(gtest_version helloworld CONAN_PKG::gtest)
-
-    set_target_properties(gtest_version PROPERTIES
-        CXX_STANDARD 14
-        CXX_STANDARD_REQUIRED ON
-    )
-
-endif()
-
 if (MSVC)
     target_compile_options(helloworld_cli PRIVATE
         /W4
@@ -97,7 +73,7 @@ endif()
 
 install(TARGETS helloworld_cli RUNTIME DESTINATION bin)
 
-set(CPACK_GENERATOR NuGet)
+set(CPACK_GENERATOR DEB)
 set(CPACK_PACKAGE_VERSION_MAJOR "${PROJECT_VERSION_MAJOR}")
 set(CPACK_PACKAGE_VERSION_MINOR "${PROJECT_VERSION_MINOR}")
 set(CPACK_PACKAGE_VERSION_PATCH "${PROJECT_VERSION_PATCH}")
@@ -106,11 +82,5 @@ include(CPack)
 
 if(WITH_BOOST_TEST)
     enable_testing()
-    add_test(test_version "${CMAKE_BINARY_DIR}/bin/test_version")
-endif()
-
-
-if(WITH_GTEST)
-    enable_testing()
-    add_test(gtest_version "${CMAKE_BINARY_DIR}/bin/gtest_version")
+    add_test(test_version test_version)
 endif()
